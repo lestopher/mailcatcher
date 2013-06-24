@@ -48,7 +48,7 @@ module MailCatcher extend self
 
   @defaults = {
     :smtp_ip => '127.0.0.1',
-    :smtp_port => '1025',
+    :smtp_port => '25',
     :http_ip => '127.0.0.1',
     :http_port => '1080',
     :verbose => false,

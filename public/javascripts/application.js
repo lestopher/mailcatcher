@@ -1,37 +1,29 @@
 (function() {
   var MailCatcher,
-    _this = this;
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   jQuery.expr[':'].icontains = function(a, i, m) {
     var _ref, _ref1;
+
     return ((_ref = (_ref1 = a.textContent) != null ? _ref1 : a.innerText) != null ? _ref : "").toUpperCase().indexOf(m[3].toUpperCase()) >= 0;
   };
 
   MailCatcher = (function() {
-
     function MailCatcher() {
+      this.nextTab = __bind(this.nextTab, this);
+      this.previousTab = __bind(this.previousTab, this);
+      this.openTab = __bind(this.openTab, this);
+      this.selectedTab = __bind(this.selectedTab, this);
+      this.getTab = __bind(this.getTab, this);
       var _this = this;
-      this.nextTab = function(tab) {
-        return MailCatcher.prototype.nextTab.apply(_this, arguments);
-      };
-      this.previousTab = function(tab) {
-        return MailCatcher.prototype.previousTab.apply(_this, arguments);
-      };
-      this.openTab = function(i) {
-        return MailCatcher.prototype.openTab.apply(_this, arguments);
-      };
-      this.selectedTab = function() {
-        return MailCatcher.prototype.selectedTab.apply(_this, arguments);
-      };
-      this.getTab = function(i) {
-        return MailCatcher.prototype.getTab.apply(_this, arguments);
-      };
+
       $('#messages tr').live('click', function(e) {
         e.preventDefault();
         return _this.loadMessage($(e.currentTarget).attr('data-message-id'));
       });
       $('input[name=search]').keyup(function(e) {
         var query;
+
         query = $.trim($(e.currentTarget).val());
         if (query) {
           return _this.searchMessages(query);
@@ -50,6 +42,7 @@
       $('#resizer').live({
         mousedown: function(e) {
           var events;
+
           e.preventDefault();
           return $(window).bind(events = {
             mouseup: function(e) {
@@ -128,6 +121,7 @@
       });
       key('backspace, delete', function() {
         var id;
+
         id = _this.selectedMessage();
         if (id != null) {
           $.ajax({
@@ -135,6 +129,7 @@
             type: 'DELETE',
             success: function() {
               var messageRow, switchTo;
+
               messageRow = $("#messages tbody tr[data-message-id='" + id + "']");
               switchTo = messageRow.next().data('message-id') || messageRow.prev().data('message-id');
               messageRow.remove();
@@ -159,6 +154,7 @@
 
     MailCatcher.prototype.parseDate = function(date) {
       var match;
+
       if (match = this.parseDateRegexp.exec(date)) {
         return new Date(match[1], match[2] - 1, match[3], match[4], match[5], match[6], 0);
       }
@@ -166,6 +162,7 @@
 
     MailCatcher.prototype.offsetTimeZone = function(date) {
       var offset;
+
       offset = Date.now().getTimezoneOffset() * 60000;
       date.setTime(date.getTime() - offset);
       return date;
@@ -201,6 +198,7 @@
 
     MailCatcher.prototype.previousTab = function(tab) {
       var i;
+
       i = tab || tab === 0 ? tab : this.selectedTab() - 1;
       if (i < 0) {
         i = this.tabs().length - 1;
@@ -214,6 +212,7 @@
 
     MailCatcher.prototype.nextTab = function(tab) {
       var i;
+
       i = tab ? tab : this.selectedTab() + 1;
       if (i > this.tabs().length - 1) {
         i = 0;
@@ -238,8 +237,10 @@
 
     MailCatcher.prototype.searchMessages = function(query) {
       var $rows, selector, token;
+
       selector = ((function() {
         var _i, _len, _ref, _results;
+
         _ref = query.split(/\s+/);
         _results = [];
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -263,6 +264,7 @@
 
     MailCatcher.prototype.scrollToRow = function(row) {
       var overflow, relativePosition;
+
       relativePosition = row.offset().top - $('#messages').offset().top;
       if (relativePosition < 0) {
         return $('#messages').scrollTop($('#messages').scrollTop() + relativePosition - 20);
@@ -284,6 +286,7 @@
     MailCatcher.prototype.loadMessage = function(id) {
       var messageRow,
         _this = this;
+
       if ((id != null ? id.id : void 0) != null) {
         id = id.id;
       }
@@ -295,12 +298,14 @@
         this.scrollToRow(messageRow);
         return $.getJSON("/messages/" + id + ".json", function(message) {
           var $ul;
+
           $('#message .metadata dd.created_at').text(_this.formatDate(message.created_at));
           $('#message .metadata dd.from').text(message.sender);
           $('#message .metadata dd.to').text((message.recipients || []).join(', '));
           $('#message .metadata dd.subject').text(message.subject);
           $('#message .views .tab.format').each(function(i, el) {
             var $el, format;
+
             $el = $(el);
             format = $el.attr('data-message-format');
             if ($.inArray(format, message.formats) >= 0) {
@@ -346,6 +351,7 @@
 
     MailCatcher.prototype.loadMessageAnalysis = function(id) {
       var $form, $iframe;
+
       id || (id = this.selectedMessage());
       $("#message .views .analysis.tab:not(.selected)").addClass('selected');
       $("#message .views :not(.analysis).tab.selected").removeClass('selected');
@@ -361,6 +367,7 @@
 
     MailCatcher.prototype.refresh = function() {
       var _this = this;
+
       return $.getJSON('/messages', function(messages) {
         return $.each(messages, function(i, message) {
           if (!_this.haveMessage(message)) {
@@ -381,6 +388,7 @@
     MailCatcher.prototype.subscribeWebSocket = function() {
       var secure,
         _this = this;
+
       secure = window.location.scheme === 'https';
       this.websocket = new WebSocket("" + (secure ? 'wss' : 'ws') + "://" + window.location.host + "/messages");
       return this.websocket.onmessage = function(event) {
@@ -390,6 +398,7 @@
 
     MailCatcher.prototype.subscribePoll = function() {
       var _this = this;
+
       if (this.refreshInterval == null) {
         return this.refreshInterval = setInterval((function() {
           return _this.refresh();
